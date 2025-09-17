@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Result</title>
+  </head>
+  <body>
+    <h1>Prediction</h1>
+    <img src="/uploads/{{ filename }}" alt="uploaded" style="max-width:400px; height:auto;">
+    <p>Label: <strong>{{ result.label }}</strong></p>
+    <p>Confidence: <strong>{{ '%.2f'|format(result.confidence * 100) }}%</strong></p>
+    <p>Raw score (model output): {{ result.raw_score }}</p>
+    <a href="/">Classify another image</a>
+  </body>
+</html>

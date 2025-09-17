@@ -1,0 +1,24 @@
+from tensorflow.keras.preprocessing import image_dataset_from_directory
+
+dataset_path = r"C:\Users\Bernard\Downloads\PetImages"
+
+train_ds = image_dataset_from_directory(
+    dataset_path,
+    validation_split=0.2,
+    subset="training",
+    seed=123,
+    image_size=(224, 224),  
+    batch_size=32
+)
+
+val_ds = image_dataset_from_directory(
+    dataset_path,
+    validation_split=0.2,
+    subset="validation",
+    seed=123,
+    image_size=(224, 224),
+    batch_size=32
+)
+
+print(f"Training batches: {len(train_ds)}")
+print(f"Validation batches: {len(val_ds)}")

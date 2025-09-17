@@ -1,0 +1,8 @@
+import tensorflow_datasets as tfds
+
+tfds.load(
+    'cats_vs_dogs',
+    split='train',
+    data_dir='C:\Users\Bernard\Downloads\kagglecatsanddogs_5340.zip',  # path to the folder containing the zip
+    download=False
+)
