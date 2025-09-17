@@ -1,66 +1,25 @@
-import tensorflow as tf
-from tensorflow.keras.preprocessing import image_dataset_from_directory
-from tensorflow.keras import layers, models
-import argparse
+from preprocess import get_datasets
+from model_builder import build_simple_cnn
+from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
 import os
 
+train_ds, val_ds = get_datasets('dataset/train', 'dataset/val', augment=True)
+num_classes = len(train_ds.class_names)
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--epochs', type=int, default=4, help='Number of epochs')
-parser.add_argument('--batch_size', type=int, default=32, help='Batch size')
-parser.add_argument('--output_dir', type=str, default='model', help='Directory to save model')
-parser.add_argument('--dataset_path', type=str, default=r"C:\Users\Bernard\Downloads\PetImages",
-                    help='Path to local PetImages folder')
-args = parser.parse_args()
+model = build_simple_cnn(num_classes)
 
-train_ds = image_dataset_from_directory(
-    args.dataset_path,
-    validation_split=0.2,
-    subset="training",
-    seed=123,
-    image_size=(224, 224),  
-    batch_size=args.batch_size
-)
+model.compile(optimizer='adam',
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
 
-val_ds = image_dataset_from_directory(
-    args.dataset_path,
-    validation_split=0.2,
-    subset="validation",
-    seed=123,
-    image_size=(224, 224),
-    batch_size=args.batch_size
-)
+checkpoint = ModelCheckpoint("best_model.h5", save_best_only=True)
+early_stop = EarlyStopping(patience=5, restore_best_weights=True)
 
-AUTOTUNE = tf.data.AUTOTUNE
-train_ds = train_ds.prefetch(buffer_size=AUTOTUNE)
-val_ds = val_ds.prefetch(buffer_size=AUTOTUNE)
+history = model.fit(train_ds,
+                    validation_data=val_ds,
+                    epochs=4,
+                    callbacks=[checkpoint, early_stop])
 
-model = models.Sequential([
-    layers.Rescaling(1./255, input_shape=(224, 224, 3)),
-    layers.Conv2D(32, (3, 3), activation='relu'),
-    layers.MaxPooling2D((2, 2)),
-    layers.Conv2D(64, (3, 3), activation='relu'),
-    layers.MaxPooling2D((2, 2)),
-    layers.Conv2D(128, (3, 3), activation='relu'),
-    layers.MaxPooling2D((2, 2)),
-    layers.Flatten(),
-    layers.Dense(128, activation='relu'),
-    layers.Dense(2, activation='softmax')  
-])
-
-model.compile(
-    optimizer='adam',
-    loss='sparse_categorical_crossentropy', 
-    metrics=['accuracy']
-)
-
-history = model.fit(
-    train_ds,
-    validation_data=val_ds,
-    epochs=args.epochs
-)
-
-os.makedirs(args.output_dir, exist_ok=True)
-model.save(args.output_dir)
-
-print(f"Model saved to {args.output_dir}")
+os.makedirs("model", exist_ok=True)
+model.save("model")
+print("Model saved to 'model/'")
