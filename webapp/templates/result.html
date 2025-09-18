@@ -9,7 +9,14 @@
     <img src="/uploads/{{ filename }}" alt="uploaded" style="max-width:400px; height:auto;">
     <p>Label: <strong>{{ result.label }}</strong></p>
     <p>Confidence: <strong>{{ '%.2f'|format(result.confidence * 100) }}%</strong></p>
-    <p>Raw score (model output): {{ result.raw_score }}</p>
+    <p>Raw score (model sigmoid output): {{ result.raw_score }}</p>
+
+    {% if result.mock %}
+      <p style="color:red; font-weight:bold">
+        This is a mock prediction (train a model with <code>train.py</code> to get real results)
+      </p>
+    {% endif %}
+
     <a href="/">Classify another image</a>
   </body>
 </html>
